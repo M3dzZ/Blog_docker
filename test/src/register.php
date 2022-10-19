@@ -1,3 +1,35 @@
+<?php
+
+require_once './connect.php';
+
+if (isset($_POST['name'])) {
+
+    $username = $_POST['name'];
+    $password = $_POST['pass'];
+    $sql = "SELECT username from authentification where username =:username";
+    $query = $conn->prepare($sql);
+
+    $query->bindParam(':username', $username, PDO::PARAM_STR);
+    $query->execute();
+
+
+    $results = $query->fetchAll(PDO::FETCH_OBJ);
+
+    if ($query->rowCount() > 0) {
+?>
+
+        <span>Ce nom est deja utilise, veuillez en choisir un nouveau</span>
+<?php
+
+    } else {
+        $requete = "INSERT INTO authentification (username,password) VALUES('$username','$password')";
+        $resultat = $conn->query($requete);
+        header("Location: login.php");
+        exit();
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -17,54 +49,12 @@
         <input type="text" name="name" requirer="requirer" placeholder="Bobby1234">
 
         <label for="">Password</label>
-        <input type="text" name="passW" required="required" placeholder="**********">
+        <input type="password" name="pass" required="required" placeholder="**********">
 
         <input type="submit" name="submit" value="Connexion">
 
     </form>
 
-    <?php
-
-    $servername = "db";
-    $dbname = "data";
-    $name = "root";
-    $mdp = "password";
-
-    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $name, $mdp);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-
-    if (isset($_POST['name'])) {
-
-        $username = $_POST['name'];
-        $sql = "SELECT username from authentification where username =:username";
-        $query = $conn->prepare($sql);
-
-        $query->bindParam(':username', $username, PDO::PARAM_STR);
-        $query->execute();
-
-
-        $results = $query->fetchAll(PDO::FETCH_OBJ);
-
-        if ($query->rowCount() > 0) {
-    ?>
-
-            <span>Ce nom est deja utilise, veuillez en choisir un nouveau</span>
-        <?php
-
-        } else {
-            $requete = "INSERT INTO authentification (username,password) VALUES('$username','$password')";
-            $resultat = $conn->query($requete);
-
-        ?>
-            <script>
-                window.location = "posts.php";
-            </script>
-    <?php
-
-        }
-    }
-    ?>
 
 </body>
 

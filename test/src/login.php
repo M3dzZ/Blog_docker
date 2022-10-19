@@ -1,6 +1,44 @@
 <?php
 session_start();
+
+require_once './connect.php';
+
+
+if (!empty($_POST['login']) && !empty($_POST['pass'])) {
+
+    $username = $_POST['login'];
+    $password = $_POST['pass'];
+
+    $requete = "SELECT * from authentification where username =:username";
+    $query = $conn->prepare($requete);
+
+    $query->bindParam(':username', $username, PDO::PARAM_STR);
+    $query->execute();
+    $user = $query->fetch();
+
+
+    if ($query->rowCount() > 0) {
+
+        if (($_POST['pass'] === $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
+            header('Location: /posts.php');
+            exit();
+        } else { ?>
+
+            <span>Mot de passe incorrect <?php print($username) ?></span><br>
+        <?php
+
+        }
+    } else { ?>
+        <span>Username inconnu</span><br>
+        <a href="register.php">Pour vous register cliquez ici !</a>
+<?php
+
+    }
+}
+
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -24,57 +62,11 @@ session_start();
         <input type="text" name="login" requirer="requirer" placeholder="Bobby1234">
 
         <label for="">Password</label>
-        <input type="text" name="pass" required="required" placeholder="**********">
+        <input type="password" name="pass" required="required" placeholder="**********">
 
         <input type="submit" name="submit" value="Connexion">
     </form>
 
-    <?php
-    $servername = "db";
-    $dbname = "data";
-    $name = "root";
-    $mdp = "password";
-
-    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $name, $mdp);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    if (!empty($_POST['login']) && !empty($_POST['pass'])) {
-
-        $username = $_POST['login'];
-        $password = $_POST['pass'];
-
-        $requete = "SELECT * from authentification where username =:username";
-        $query = $conn->prepare($requete);
-
-        $query->bindParam(':username', $username, PDO::PARAM_STR);
-        $query->execute();
-        $user = $query->fetch();
-
-
-        if ($query->rowCount() > 0) {
-
-            if (($_POST['pass'] === $user['password'])) {
-                $_SESSION['user_id'] = $user['id'];
-    ?>
-                <script>
-                    window.location = "posts.php";
-                </script>
-            <?php
-            } else { ?>
-
-                <span>Mot de passe incorrect <?php print($username) ?></span><br>
-            <?php
-
-            }
-        } else { ?>
-            <span>Username inconnu</span><br>
-            <a href="register.php">Pour vous register cliquez ici !</a>
-    <?php
-
-        }
-    }
-
-    ?>
 
 </body>
 
